@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Raja Mantri Chor Sipahi — Multiplayer</title>
+  <meta name="description" content="भारत का बचपन वाला खेल, अब आपके phone पर। Room code से जुड़ें और 4 दोस्तों के साथ live खेलें।" />
+  <meta name="theme-color" content="#160f24" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👑</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&family=Rozha+One&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css?v=1" />
+  <script>window.__WS_BASE__ = '__PORT_8000__';</script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to game</a>
+  <header class="topbar">
+    <div class="brand" aria-label="Raja Mantri Chor Sipahi">
+      <span class="brand-mark" aria-hidden="true">👑</span>
+      <span class="brand-text" data-i18n="brand">राजा मंत्री चोर सिपाही</span>
+    </div>
+    <div class="top-actions">
+      <span class="conn" id="conn" role="status" aria-live="polite"></span>
+      <button class="icon-btn" id="btnLang" aria-label="Change language">EN</button>
+      <button class="icon-btn" id="btnMute" aria-label="Mute sound" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3z"/><path class="wave" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="x" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 9l6 6M22 9l-6 6"/></svg>
+      </button>
+      <button class="icon-btn" id="btnHelp" aria-label="How to play">?</button>
+    </div>
+  </header>
+
+  <main id="main" class="stage" tabindex="-1">
+    <div id="screen" class="screen"></div>
+  </main>
+
+  <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+
+  <dialog id="help" class="sheet" aria-labelledby="helpTitle">
+    <div class="sheet-inner" id="helpBody"></div>
+  </dialog>
+
+  <script type="module" src="./app.js?v=1"></script>
+</body>
+</html>
