@@ -244,7 +244,24 @@ wss.on('connection', ws => {
     if (!room || !me || !rooms.has(room.code)) return err('noroom');
     const isHost = room.hostId === me.id;
 
-    switch (m.t) {
+    switch (m.t) case 'voice-signal': {
+  const targetId = String(m.to || '');
+  const target = room.players.find(
+    p => p.id === targetId && p.connected
+  );
+
+  if (!target || target.id === me.id) return;
+
+  if (!m.signal || typeof m.signal !== 'object') return;
+
+  send(target.ws, {
+    t: 'voice-signal',
+    from: me.id,
+    signal: m.signal
+  });
+
+  return;
+}{
       case 'rounds':
         if (!isHost || room.phase !== 'lobby') return;
         if ([5, 10, 15].includes(m.n)) { room.totalRounds = m.n; broadcast(room); }
