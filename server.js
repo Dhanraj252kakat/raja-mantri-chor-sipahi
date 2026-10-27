@@ -244,7 +244,9 @@ wss.on('connection', ws => {
     if (!room || !me || !rooms.has(room.code)) return err('noroom');
     const isHost = room.hostId === me.id;
 
-    switch (m.t) case 'voice-signal': {
+    switch (m.t) {
+
+  case 'voice-signal': {
   const targetId = String(m.to || '');
   const target = room.players.find(
     p => p.id === targetId && p.connected
