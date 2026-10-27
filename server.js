@@ -184,12 +184,29 @@ function ensureHost(room) {
 }
 
 // ---------- websocket ----------
+
 const wss = new WebSocketServer({ noServer: true });
+
 server.on('upgrade', (req, socket, head) => {
+  console.log('WS upgrade request:', req.url);
+
   const url = new URL(req.url, 'http://x');
-  if (!url.pathname.endsWith('/ws')) { socket.destroy(); return; }
-  wss.handleUpgrade(req, socket, head, ws => wss.emit('connection', ws, req));
+
+  if (!url.pathname.endsWith('/ws')) {
+    console.log('Rejected WebSocket path:', url.pathname);
+    socket.destroy();
+    return;
+  }
+
+  wss.handleUpgrade(req, socket, head, ws =>
+    wss.emit('connection', ws, req)
+  );
 });
+
+wss.on('connection', (ws, req) => {
+  console.log('WebSocket connected:', req.url);
+});
+
 
 wss.on('connection', ws => {
   ws.isAlive = true;
