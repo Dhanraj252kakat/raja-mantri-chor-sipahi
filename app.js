@@ -152,25 +152,16 @@ const sfx = {
 
 // ---------------- websocket ----------------
 
+
+
 function wsUrl() {
+
   const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+
   return `${protocol}//${location.host}/ws`;
+
 }
 
-  const raw = window.__WS_BASE__ || '';
-  const unresolved = raw.startsWith('__PORT_');
-  const local = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
-  if (unresolved) {
-    if (!local && location.protocol !== 'file:') {
-      // Self-hosted (same server serves static + ws)
-      return `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`;
-    }
-    return `ws://${location.host || 'localhost:8000'}/ws`;
-  }
-  const prefix = location.pathname.replace(/\/[^/]*$/, '');
-  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${proto}//${location.host}${prefix}/${raw.replace(/^\//, '')}/ws`;
-}
 function connect() {
   let ws;
   try { ws = new WebSocket(wsUrl()); } catch { return scheduleRetry(); }
