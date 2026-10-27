@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const { WebSocketServer } = require('ws');
 
 const PORT = process.env.PORT || 8000;
-const PUBLIC = path.join(__dirname, 'public');
+const PUBLIC = __dirname;
 
 const ROLES = ['raja', 'mantri', 'sipahi', 'chor'];
 const POINTS = { raja: 1000, mantri: 800, sipahi: 500, chor: 0 };
