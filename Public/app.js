@@ -183,26 +183,28 @@ function setConn(ok) {
 document.addEventListener('visibilitychange', () => { if (!document.hidden && (!S.ws || S.ws.readyState > 1)) connect(); });
 
 
+
 function onMsg(m) {
   if (m.t === 'state') {
     const prev = S.room;
     S.room = m.room;
     S.you = m.you;
-    if (typeof voiceUpdate === 'function') {
-  voiceUpdate();
-}
-    window.voiceUpdate = voiceUpdate;
+
+    if (typeof window.voiceUpdate === 'function') {
+      window.voiceUpdate();
+    }
+
     S.offset = m.room.serverNow - Date.now();
     S.session = { code: m.room.code, pid: m.you };
     writeHash();
     soundForTransition(prev, m.room);
     render();
-  }
+
   } else if (m.t === 'voice-signal') {
-  if (typeof window.voiceSignal === 'function') {
-    window.voiceSignal(m.from, m.signal);
-  }
-}
+    if (typeof window.voiceSignal === 'function') {
+      window.voiceSignal(m.from, m.signal);
+    }
+
   } else if (m.t === 'error') {
     if (m.code === 'noroom' || m.code === 'noseat') {
       S.session = null;
@@ -211,6 +213,7 @@ function onMsg(m) {
       render();
     }
     toast(T[S.lang].err[m.code] || m.code);
+
   } else if (m.t === 'left') {
     S.session = null;
     S.room = null;
