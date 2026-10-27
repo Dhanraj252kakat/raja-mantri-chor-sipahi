@@ -190,17 +190,20 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && (!
 
 function onMsg(m) {
   if (m.t === 'state') {
+        voiceUpdate();
     const prev = S.room;
     S.room = m.room; S.you = m.you; S.offset = m.room.serverNow - Date.now();
     S.session = { code: m.room.code, pid: m.you }; writeHash();
     soundForTransition(prev, m.room);
     render();
+      } else if (m.t === 'voice-signal') {
+    voiceSignal(m.from, m.signal);
   } else if (m.t === 'error') {
     if (m.code === 'noroom' || m.code === 'noseat') {
       if (S.session) { S.session = null; S.room = null; writeHash(); render(); }
     }
     toast(T[S.lang].err[m.code] || m.code);
-  } else if (m.t === 'left') {
+  } else if (m.t === 'left')     voiceUpdate();{
     S.session = null; S.room = null; S.you = null; writeHash(); render();
   }
 }
@@ -624,6 +627,246 @@ $('#help').addEventListener('click', (e) => { if (e.target.id === 'help') e.curr
 
 // ---------------- boot ----------------
 (function boot() {
+  
+/* ---------------- room voice chat ---------------- */
+const Voice = {
+  stream: null,
+  peers: new Map(),
+  micOn: false,
+  speakerOn: true,
+  panel: null,
+};
+
+function voiceSend(to, signal) {
+  send({ t: 'voice-signal', to, signal });
+}
+
+function voicePanel() {
+  if (Voice.panel) return Voice.panel;
+
+  const panel = document.createElement('div');
+  panel.id = 'voicePanel';
+  panel.style.cssText = [
+    'position:fixed',
+    'bottom:12px',
+    'left:12px',
+    'right:12px',
+    'z-index:9999',
+    'padding:12px',
+    'border-radius:14px',
+    'background:#202020',
+    'color:white',
+    'display:none',
+    'gap:8px',
+    'align-items:center',
+    'justify-content:center',
+    'flex-wrap:wrap',
+    'box-shadow:0 4px 18px #0005'
+  ].join(';');
+
+  panel.innerHTML = `
+    <strong style="width:100%;text-align:center">🎙️ Room Voice Chat</strong>
+    <button id="voiceMic" type="button">🎤 Mic ON</button>
+    <button id="voiceSpeaker" type="button">🔊 Sound ON</button>
+    <span id="voiceStatus" style="font-size:12px">Mic चालू करके बात करें</span>
+    <div id="voiceAudios" style="display:none"></div>
+  `;
+
+  document.body.appendChild(panel);
+  Voice.panel = panel;
+
+  $('#voiceMic').addEventListener('click', async () => {
+    if (Voice.micOn) {
+      Voice.stream?.getAudioTracks().forEach(track => {
+        track.enabled = false;
+      });
+      Voice.micOn = false;
+      $('#voiceMic').textContent = '🎤 Mic OFF';
+      $('#voiceStatus').textContent = 'आपका mic बंद है';
+      return;
+    }
+
+    try {
+      if (!Voice.stream) {
+        Voice.stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: false
+        });
+      }
+
+      Voice.stream.getAudioTracks().forEach(track => {
+        track.enabled = true;
+      });
+
+      Voice.micOn = true;
+      $('#voiceMic').textContent = '🎤 Mic ON';
+
+      await voiceConnectPeers();
+      $('#voiceStatus').textContent = 'Mic चालू है';
+    } catch (err) {
+      $('#voiceStatus').textContent =
+        'Mic permission दें और HTTPS पर खोलें';
+    }
+  });
+
+  $('#voiceSpeaker').addEventListener('click', () => {
+    Voice.speakerOn = !Voice.speakerOn;
+
+    Voice.peers.forEach(peer => {
+      if (peer.audio) peer.audio.muted = !Voice.speakerOn;
+    });
+
+    $('#voiceSpeaker').textContent =
+      Voice.speakerOn ? '🔊 Sound ON' : '🔇 Sound OFF';
+  });
+
+  return panel;
+}
+
+function voicePeer(id) {
+  if (Voice.peers.has(id)) return Voice.peers.get(id);
+
+  const pc = new RTCPeerConnection({
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' }
+    ]
+  });
+
+  const peer = { pc, audio: null };
+  Voice.peers.set(id, peer);
+
+  if (Voice.stream) {
+    Voice.stream.getAudioTracks().forEach(track => {
+      pc.addTrack(track, Voice.stream);
+    });
+  }
+
+  pc.onicecandidate = event => {
+    if (event.candidate) {
+      voiceSend(id, {
+        type: 'candidate',
+        candidate: event.candidate
+      });
+    }
+  };
+
+  pc.ontrack = event => {
+    if (!peer.audio) {
+      peer.audio = document.createElement('audio');
+      peer.audio.autoplay = true;
+      peer.audio.playsInline = true;
+      peer.audio.muted = !Voice.speakerOn;
+      $('#voiceAudios').appendChild(peer.audio);
+    }
+
+    peer.audio.srcObject = event.streams[0];
+    peer.audio.play().catch(() => {});
+  };
+
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === 'failed') {
+      $('#voiceStatus').textContent =
+        'Voice connection नहीं हुआ; दोबारा कोशिश करें';
+    }
+  };
+
+  return peer;
+}
+
+async function voiceConnectPeers() {
+  if (!S.room || !S.you || !Voice.stream) return;
+
+  const others = S.room.players.filter(p =>
+    p.connected && p.id !== S.you
+  );
+
+  for (const p of others) {
+    const peer = voicePeer(p.id);
+
+    // Only one player creates the offer for each pair.
+    if (String(S.you) < String(p.id) &&
+        peer.pc.signalingState === 'stable') {
+      try {
+        const offer = await peer.pc.createOffer();
+        await peer.pc.setLocalDescription(offer);
+        voiceSend(p.id, {
+          type: 'offer',
+          sdp: peer.pc.localDescription
+        });
+      } catch (err) {
+        console.error('Voice offer failed:', err);
+      }
+    }
+  }
+
+  // Remove connections for players who left.
+  for (const [id, peer] of Voice.peers) {
+    if (!others.some(p => p.id === id)) {
+      peer.pc.close();
+      peer.audio?.remove();
+      Voice.peers.delete(id);
+    }
+  }
+}
+
+async function voiceSignal(from, signal) {
+  if (!from || !signal || !S.room) return;
+
+  const player = S.room.players.find(p =>
+    p.id === from && p.connected
+  );
+  if (!player || player.id === S.you) return;
+
+  const peer = voicePeer(from);
+  const pc = peer.pc;
+
+  try {
+    if (signal.type === 'offer') {
+      if (!Voice.stream) {
+        // The receiver can accept the call after enabling their mic.
+        $('#voiceStatus').textContent =
+          'बात करने के लिए Mic ON करें';
+        return;
+      }
+
+      await pc.setRemoteDescription(signal.sdp);
+
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      voiceSend(from, {
+        type: 'answer',
+        sdp: pc.localDescription
+      });
+    } else if (signal.type === 'answer') {
+      await pc.setRemoteDescription(signal.sdp);
+    } else if (signal.type === 'candidate' && signal.candidate) {
+      await pc.addIceCandidate(signal.candidate);
+    }
+  } catch (err) {
+    console.error('Voice signal failed:', err);
+  }
+}
+
+function voiceUpdate() {
+  const panel = voicePanel();
+  const inRoom = !!S.room && S.room.players.length > 1;
+
+  panel.style.display = inRoom ? 'flex' : 'none';
+
+  if (inRoom && Voice.stream) {
+    voiceConnectPeers();
+  }
+
+  if (!inRoom) {
+    Voice.peers.forEach(peer => {
+      peer.pc.close();
+      peer.audio?.remove();
+    });
+    Voice.peers.clear();
+  }
+}
+
   const h = readHash();
   if (h.lang === 'en') S.lang = 'en';
   if (h.r && h.p) S.session = { code: h.r, pid: h.p };
