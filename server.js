@@ -263,7 +263,7 @@ wss.on('connection', ws => {
   });
 
   return;
-}{
+}
       case 'rounds':
         if (!isHost || room.phase !== 'lobby') return;
         if ([5, 10, 15].includes(m.n)) { room.totalRounds = m.n; broadcast(room); }
