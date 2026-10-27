@@ -188,25 +188,38 @@ function setConn(ok) {
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && (!S.ws || S.ws.readyState > 1)) connect(); });
 
+
 function onMsg(m) {
   if (m.t === 'state') {
-        voiceUpdate();
     const prev = S.room;
-    S.room = m.room; S.you = m.you; S.offset = m.room.serverNow - Date.now();
-    S.session = { code: m.room.code, pid: m.you }; writeHash();
+    S.room = m.room;
+    S.you = m.you;
+    S.offset = m.room.serverNow - Date.now();
+    S.session = { code: m.room.code, pid: m.you };
+    writeHash();
     soundForTransition(prev, m.room);
     render();
-      } else if (m.t === 'voice-signal') {
-    voiceSignal(m.from, m.signal);
+  } else if (m.t === 'voice-signal') {
+    if (typeof voiceSignal === 'function') {
+      voiceSignal(m.from, m.signal);
+    }
   } else if (m.t === 'error') {
     if (m.code === 'noroom' || m.code === 'noseat') {
-      if (S.session) { S.session = null; S.room = null; writeHash(); render(); }
+      S.session = null;
+      S.room = null;
+      writeHash();
+      render();
     }
     toast(T[S.lang].err[m.code] || m.code);
-  } else if (m.t === 'left')     voiceUpdate();{
-    S.session = null; S.room = null; S.you = null; writeHash(); render();
+  } else if (m.t === 'left') {
+    S.session = null;
+    S.room = null;
+    S.you = null;
+    writeHash();
+    render();
   }
 }
+
 
 function soundForTransition(prev, next) {
   if (!prev) return;
