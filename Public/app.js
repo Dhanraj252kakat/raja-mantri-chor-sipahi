@@ -151,7 +151,12 @@ const sfx = {
 };
 
 // ---------------- websocket ----------------
+
 function wsUrl() {
+  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${protocol}//${location.host}/ws`;
+}
+
   const raw = window.__WS_BASE__ || '';
   const unresolved = raw.startsWith('__PORT_');
   const local = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
