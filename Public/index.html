@@ -1,3 +1,82 @@
 Skip to game
 👑 राजा मंत्री चोर सिपाही
  EN    ?
+!DOCTYPE html>
+
+<html lang="hi">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="theme-color" content="#160f24">
+
+  <title>राजा मंत्री चोर सिपाही</title>
+
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+  <a class="skip" href="#screen">Skip to game</a>
+
+  <header class="topbar">
+
+    <div class="brand">
+
+      <span class="brand-mark">👑</span>
+
+      <span class="brand-text">राजा मंत्री चोर सिपाही</span>
+
+    </div>
+
+    <div class="top-actions">
+
+      <span id="conn" class="conn"></span>
+
+      <button id="btnLang" class="icon-btn" type="button">EN</button>
+
+      <button id="btnMute" class="icon-btn" type="button" aria-pressed="false">
+
+        <span class="wave">🔊</span>
+
+        <span class="x">🔇</span>
+
+      </button>
+
+      <button id="btnHelp" class="icon-btn" type="button">?</button>
+
+    </div>
+
+  </header>
+
+  <main class="stage">
+
+    <div id="screen" class="screen" tabindex="-1"></div>
+
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="help" class="sheet">
+
+    <div class="sheet-inner">
+
+      <h2 class="h-display title-xl">कैसे खेलें?</h2>
+
+      <div id="helpBody"></div>
+
+      <button id="btnCloseHelp" class="icon-btn" type="button">✕</button>
+
+    </div>
+
+  </dialog>
+
+  <script src="app.js"></script>
+
+</body>
+
+</html>
