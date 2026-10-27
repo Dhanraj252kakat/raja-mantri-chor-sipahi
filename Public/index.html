@@ -74,7 +74,27 @@ Skip to game
     </div>
 
   </dialog>
+<script>
 
+window.addEventListener('error', function(e) {
+
+  const box = document.createElement('pre');
+
+  box.style.cssText =
+
+    'background:#fff;color:#b00020;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;';
+
+  box.textContent = 'JavaScript error: ' +
+
+    e.message + '\nFile: ' + e.filename +
+
+    '\nLine: ' + e.lineno;
+
+  document.body.prepend(box);
+
+});
+
+</script>
   <script src="app.js"></script>
 
 </body>
