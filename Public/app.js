@@ -188,15 +188,21 @@ function onMsg(m) {
     const prev = S.room;
     S.room = m.room;
     S.you = m.you;
+    if (typeof voiceUpdate === 'function') {
+  voiceUpdate();
+}
+    window.voiceUpdate = voiceUpdate;
     S.offset = m.room.serverNow - Date.now();
     S.session = { code: m.room.code, pid: m.you };
     writeHash();
     soundForTransition(prev, m.room);
     render();
+  }
   } else if (m.t === 'voice-signal') {
-    if (typeof voiceSignal === 'function') {
-      voiceSignal(m.from, m.signal);
-    }
+  if (typeof window.voiceSignal === 'function') {
+    window.voiceSignal(m.from, m.signal);
+  }
+}
   } else if (m.t === 'error') {
     if (m.code === 'noroom' || m.code === 'noseat') {
       S.session = null;
@@ -854,7 +860,7 @@ async function voiceSignal(from, signal) {
     console.error('Voice signal failed:', err);
   }
 }
-
+window.voiceSignal = voiceSignal;
 function voiceUpdate() {
   const panel = voicePanel();
   const inRoom = !!S.room && S.room.players.length > 1;
