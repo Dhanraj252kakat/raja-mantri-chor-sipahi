@@ -58,6 +58,7 @@ function createRoom(hostPlayer) {
     roles: {},
     peeked: new Set(),
     guess: null,
+    guesses: {},
     outcome: null,
     deadline: null,
     history: [],
