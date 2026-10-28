@@ -122,25 +122,60 @@ function startGuess(room) {
   broadcast(room);
 }
 
-function idByRole(room, role) { return Object.keys(room.roles).find(id => room.roles[id] === role); }
+function idByRole(room, role) { return Object.keys(room.roles).find(id => room.roles[id] === 
 
-function resolveGuess(room, targetId) {
+  function resolveGuesses(room) {
   if (room.phase !== 'guess') return;
+
   clearTimer(room);
+
   const chorId = idByRole(room, 'chor');
   const mantriId = idByRole(room, 'mantri');
-  const correct = targetId === chorId;
-  room.guess = targetId;
+  const votes = Object.values(room.guesses);
+
+  const counts = {};
+  for (const targetId of votes) {
+    counts[targetId] = (counts[targetId] || 0) + 1;
+  }
+
+  const maxVotes = Math.max(0, ...Object.values(counts));
+  const leaders = Object.keys(counts).filter(
+    id => counts[id] === maxVotes
+  );
+
+  const guessedId =
+    leaders.length === 1 ? leaders[0] : null;
+
+  const correct = guessedId === chorId;
+
+  room.guess = guessedId;
+
   for (const p of room.players) {
     const role = room.roles[p.id];
     let pts = POINTS[role];
+
     if (!correct && role === 'mantri') pts = 0;
     if (!correct && role === 'chor') pts = POINTS.mantri;
+
     p.lastPoints = pts;
     p.score += pts;
   }
-  room.outcome = { correct, timedOut: targetId === null, chorId, mantriId, guessedId: targetId };
-  room.history.push({ round: room.round, correct, timedOut: targetId === null });
+
+  room.outcome = {
+    correct,
+    timedOut: votes.length === 0,
+    chorId,
+    mantriId,
+    guessedId,
+    guesses: { ...room.guesses }
+  };
+
+  room.history.push({
+    round: room.round,
+    correct,
+    timedOut: votes.length === 0
+  });
+
   room.phase = 'result';
   room.deadline = null;
   broadcast(room);
