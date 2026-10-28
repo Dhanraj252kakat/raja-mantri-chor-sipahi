@@ -122,7 +122,12 @@ function startGuess(room) {
   broadcast(room);
 }
 
-function idByRole(room, role) { return Object.keys(room.roles).find(id => room.roles[id] === 
+function idByRole(room, role) {
+  return Object.keys(room.roles).find(
+    id => room.roles[id] === role
+  );
+}
+
 
   function resolveGuesses(room) {
   if (room.phase !== 'guess') return;
