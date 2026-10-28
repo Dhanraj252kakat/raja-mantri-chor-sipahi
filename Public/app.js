@@ -873,6 +873,14 @@ function voiceUpdate() {
   const inRoom = !!S.room && S.room.players.length > 1;
 
   panel.style.display = inRoom ? 'flex' : 'none';
+const chat = chatPanel();
+chat.style.display = inRoom ? 'flex' : 'none';
+
+if (!inRoom) {
+  Chat.messages = [];
+  const body = $('#chatBody');
+  if (body) body.innerHTML = '';
+}
 
   if (inRoom && Voice.stream) {
     voiceConnectPeers();
