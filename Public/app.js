@@ -646,6 +646,80 @@ function openHelp() {
 $('#help').addEventListener('click', (e) => { if (e.target.id === 'help') e.currentTarget.close(); });
 
 // ---------------- boot ----------------
+/* ---------------- room live chat ---------------- */
+const Chat = {
+  panel: null,
+  messages: [],
+};
+
+function chatPanel() {
+  if (Chat.panel) return Chat.panel;
+
+  const panel = document.createElement('div');
+  panel.id = 'chatPanel';
+  panel.innerHTML = `
+    <div id="chatHeader">
+      <strong>💬 Room Chat</strong>
+      <button id="chatToggle" type="button">▲</button>
+    </div>
+    <div id="chatBody"></div>
+    <form id="chatForm" autocomplete="off">
+      <input id="chatInput" maxlength="500" placeholder="Message likhein..." />
+      <button type="submit">➤</button>
+    </form>
+  `;
+
+  document.body.appendChild(panel);
+  Chat.panel = panel;
+
+  $('#chatToggle').addEventListener('click', () => {
+    panel.classList.toggle('closed');
+    $('#chatToggle').textContent = panel.classList.contains('closed') ? '▲' : '▼';
+
+    if (!panel.classList.contains('closed')) {
+      const body = $('#chatBody');
+      body.scrollTop = body.scrollHeight;
+    }
+  });
+
+  $('#chatForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const input = $('#chatInput');
+    const text = input.value.trim();
+
+    if (!text || !S.room) return;
+
+    send({ t: 'chat-message', text });
+    input.value = '';
+  });
+
+  return panel;
+}
+
+function chatAddMessage(m) {
+  Chat.messages.push(m);
+
+  if (Chat.messages.length > 100) {
+    Chat.messages.shift();
+  }
+
+  const body = $('#chatBody');
+  if (!body) return;
+
+  const mine = m.from === S.you;
+
+  const el = document.createElement('div');
+  el.className = `chat-msg ${mine ? 'mine' : ''}`;
+  el.innerHTML = `
+    <span class="chat-name">${esc(m.name)}</span>
+    <span class="chat-text">${esc(m.text)}</span>
+  `;
+
+  body.appendChild(el);
+  body.scrollTop = body.scrollHeight;
+}
+
 (function boot() {
   
 /* ---------------- room voice chat ---------------- */
