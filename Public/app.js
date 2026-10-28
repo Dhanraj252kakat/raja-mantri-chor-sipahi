@@ -747,10 +747,16 @@ function voicePeer(id) {
   if (Voice.peers.has(id)) return Voice.peers.get(id);
 
   const pc = new RTCPeerConnection({
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' }
-    ]
-  });
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    {
+      urls: 'TURN_YAHAN_APNA_TURN_URL',
+      username: 'TURN_USERNAME',
+      credential: 'TURN_PASSWORD'
+    }
+  ]
+});
+
 
   const peer = { pc, audio: null };
   Voice.peers.set(id, peer);
