@@ -203,9 +203,7 @@ server.on('upgrade', (req, socket, head) => {
   );
 });
 
-wss.on('connection', (ws, req) => {
-  console.log('WebSocket connected:', req.url);
-});
+wss.on('connection', ws => { ... })  
 
 
 wss.on('connection', ws => {
