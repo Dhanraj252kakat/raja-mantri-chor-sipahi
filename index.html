@@ -16,7 +16,12 @@ Skip to game
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&family=Rozha+One&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./style.css?v=1" />
-  <script>window.__WS_BASE__ = '__PORT_8000__';</script>
+  <script>
+  window.__WS_BASE__ =
+    location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+      ? 'ws://localhost:8000'
+      : wss://${location.host};
+</script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to game</a>
