@@ -105,6 +105,7 @@ function startRound(room) {
   room.players.forEach((p, i) => { room.roles[p.id] = roles[i]; p.lastPoints = 0; });
   room.peeked = new Set();
   room.guess = null;
+  room.guesses = {};
   room.outcome = null;
   room.phase = 'roles';
   room.deadline = Date.now() + ROLE_PEEK_MS;
@@ -117,7 +118,7 @@ function startGuess(room) {
   clearTimer(room);
   room.phase = 'guess';
   room.deadline = Date.now() + GUESS_MS;
-  room.timer = setTimeout(() => resolveGuess(room, null), GUESS_MS);
+  room.timer = setTimeout(() => resolveGuesses(room), GUESS_MS);
   broadcast(room);
 }
 
