@@ -354,11 +354,19 @@ wss.on('connection', ws => {
         if (room.phase !== 'roles' || room.roles[me.id] !== 'raja') return;
         return startGuess(room);
       case 'guess': {
-        if (room.phase !== 'guess' || room.roles[me.id] !== 'mantri') return;
-        const t = room.players.find(p => p.id === m.target);
-        if (!t || !['chor', 'sipahi'].includes(room.roles[t.id])) return;
-        return resolveGuess(room, t.id);
-      }
+  if (room.phase !== 'guess') return;
+  if (room.guesses[me.id]) return;
+
+  const target = room.players.find(
+    p => p.id === m.target
+  );
+
+  if (!target || target.id === me.id) return;
+
+  room.guesses[me.id] = target.id;
+  broadcast(room);
+  return;
+}
       case 'next':
         if (!isHost) return;
         return nextOrFinish(room);
