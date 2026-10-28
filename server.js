@@ -281,6 +281,27 @@ wss.on('connection', ws => {
 
   return;
 }
+        
+      case 'chat-message': {
+        const text = String(m.text || '').trim().slice(0, 500);
+        if (!text) return;
+
+        const message = {
+          t: 'chat-message',
+          from: me.id,
+          name: me.name,
+          text,
+          time: Date.now()
+        };
+
+        for (const player of room.players) {
+          if (player.connected) {
+            send(player.ws, message);
+          }
+        }
+        return;
+      }
+
       case 'rounds':
         if (!isHost || room.phase !== 'lobby') return;
         if ([5, 10, 15].includes(m.n)) { room.totalRounds = m.n; broadcast(room); }
