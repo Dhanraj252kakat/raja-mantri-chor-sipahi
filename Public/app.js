@@ -200,7 +200,11 @@ function onMsg(m) {
     soundForTransition(prev, m.room);
     render();
 
-  } else if (m.t === 'voice-signal') {
+  } else if (m.t === 'voice-signal') 
+  else if (m.t === 'chat-message') {
+  chatAddMessage(m);
+}
+{
     if (typeof window.voiceSignal === 'function') {
       window.voiceSignal(m.from, m.signal);
     }
