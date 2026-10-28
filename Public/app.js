@@ -374,6 +374,31 @@ function viewLobby() {
         : `<p class="status-line"><span class="dots">${t('waitHost')}</span></p>`}
     </div>
   </div>
+  <div class="panel stack">
+
+    <h2 class="h-display title-xl">💬 Room Chat</h2>
+
+    <div id="chatMessages" style="max-height:220px;overflow-y:auto;padding:10px">
+
+      ${S.chatMessages.map(m => `
+
+        <p><strong>${esc(m.name || 'Player')}:</strong> ${esc(m.text || '')}</p>
+
+      `).join('') || '<p class="muted">अभी कोई message नहीं है।</p>'}
+
+    </div>
+
+    <form id="chatForm" class="row" style="gap:8px">
+
+      <input id="chatInput" maxlength="500"
+
+             placeholder="Message लिखें..." style="flex:1;min-width:0">
+
+      <button class="btn primary" type="submit">Send</button>
+
+    </form>
+
+  </div>
   <div class="center" style="margin-top:14px"><button class="btn ghost" data-act="leave">${t('leave')}</button></div>`;
 }
 
@@ -622,6 +647,18 @@ document.addEventListener('click', (e) => {
   }
 });
 document.addEventListener('submit', (e) => {
+  if (e.target.id !== 'chatForm') return;
+
+  e.preventDefault();
+
+  const input = document.querySelector('#chatInput');
+  const text = input?.value.trim();
+
+  if (!text || !S.room) return;
+
+  send({ t: 'chat-message', text });
+  input.value = '';
+});
   if (e.target.id !== 'homeForm') return; e.preventDefault();
   const invited = S.joinCode && S.joinCode.length === 4 && !$('#code');
   invited ? doJoin() : doCreate();
