@@ -203,7 +203,6 @@ server.on('upgrade', (req, socket, head) => {
   );
 });
 
-wss.on('connection', ws => { ... })  
 
 
 wss.on('connection', ws => {
