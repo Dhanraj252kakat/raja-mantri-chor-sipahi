@@ -108,6 +108,7 @@ const S = {
   lang: 'hi', muted: false, name: '', avatar: AVATARS[Math.floor(Math.random() * AVATARS.length)], joinCode: '',
   ws: null, wsOpen: false, retry: 0, room: null, you: null, session: null, offset: 0,
   mountedKey: '', cardOpenRound: 0, resultReadyAt: {}, lastTickSec: null, pending: null,
+chatMessages: [],
 };
 const t = (k) => T[S.lang][k];
 
