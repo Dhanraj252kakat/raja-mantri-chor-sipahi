@@ -184,6 +184,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && (!
 
 
 
+
 function onMsg(m) {
   if (m.t === 'state') {
     const prev = S.room;
@@ -199,15 +200,11 @@ function onMsg(m) {
     writeHash();
     soundForTransition(prev, m.room);
     render();
-} else if (m.t === 'chat-message') {
-  S.chatMessages.push(m);
-  if (S.chatMessages.length > 100) S.chatMessages.shift();
-  render();
-  } else if (m.t === 'voice-signal') 
-  else if (m.t === 'chat-message') {
-  chatAddMessage(m);
-}
-{
+
+  } else if (m.t === 'chat-message') {
+    chatAddMessage(m);
+
+  } else if (m.t === 'voice-signal') {
     if (typeof window.voiceSignal === 'function') {
       window.voiceSignal(m.from, m.signal);
     }
@@ -219,6 +216,7 @@ function onMsg(m) {
       writeHash();
       render();
     }
+
     toast(T[S.lang].err[m.code] || m.code);
 
   } else if (m.t === 'left') {
