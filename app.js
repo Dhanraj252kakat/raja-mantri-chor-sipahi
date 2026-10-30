@@ -196,6 +196,10 @@ function onMsg(m) {
     writeHash();
     soundForTransition(prev, m.room);
     render();
+    } else if (m.t === 'chat-message') {
+    S.chatMessages.push(m);
+    if (S.chatMessages.length > 100) S.chatMessages.shift();
+    render();
   } else if (m.t === 'voice-signal') {
     if (typeof voiceSignal === 'function') {
       voiceSignal(m.from, m.signal);
