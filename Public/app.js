@@ -186,6 +186,10 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && (!
 
 
 function onMsg(m) {
+  if (m.t === 'chat-message') {
+  addChatMessage(m);
+  return;
+}
   if (m.t === 'state') {
     const prev = S.room;
     S.room = m.room;
