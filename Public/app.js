@@ -1,7 +1,25 @@
 // Raja Mantri Chor Sipahi — client
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function addChatMessage(m) {
+  const body = document.querySelector('#chatBody');
+  if (!body) return;
 
+  const item = document.createElement('div');
+  item.className = 'chat-msg' +
+    (m.from === S.you ? ' mine' : '');
+
+  const name = document.createElement('strong');
+  name.className = 'chat-name';
+  name.textContent = m.name || 'Player';
+
+  const message = document.createElement('div');
+  message.textContent = m.text || '';
+
+  item.append(name, message);
+  body.appendChild(item);
+  body.scrollTop = body.scrollHeight;
+}
 // ---------------- i18n ----------------
 const T = {
   hi: {
